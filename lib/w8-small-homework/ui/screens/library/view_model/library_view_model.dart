@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_assignments/w8-small-homework/ui/states/async_value.dart';
 import '../../../../data/repositories/songs/song_repository.dart';
 import '../../../states/player_state.dart';
 import '../../../../model/songs/song.dart';
@@ -6,7 +7,9 @@ import '../../../../model/songs/song.dart';
 class LibraryViewModel extends ChangeNotifier {
   final SongRepository songRepository;
   final PlayerState playerState;
-  List<Song>? _songs;
+
+  AsyncValue<List<Song>> songsValue = AsyncValue.loading();
+  // AsyncValue<Song>? songValue;
 
   LibraryViewModel({required this.songRepository, required this.playerState}) {
     playerState.addListener(notifyListeners);
@@ -15,21 +18,40 @@ class LibraryViewModel extends ChangeNotifier {
     _init();
   }
 
-  List<Song> get songs => _songs == null ? [] : _songs!;
-
   @override
   void dispose() {
     playerState.removeListener(notifyListeners);
     super.dispose();
   }
 
-  void _init() async {
-    // 1 - Fetch songs
-    _songs = await songRepository.fetchSongs();
+  Future<void> _init() async {
+    songsValue = AsyncValue.loading();
+    notifyListeners();
 
-    // 2 - notify listeners
+    try {
+      List<Song> songs = await songRepository.fetchSongs();
+      songsValue = AsyncValue.success(songs);
+    } catch (error) {
+      songsValue = AsyncValue.error(error);
+    }
+
     notifyListeners();
   }
+
+  // Future<void> fetchSongById(String id) async {
+  //   songValue = AsyncValue.loading();
+  //   notifyListeners();
+
+  //   try {
+  //     Song? song = await songRepository.fetchSongById(id);
+
+  //     songValue = AsyncValue.success(song);
+  //   } catch (e) {
+  //     songValue = AsyncValue.error(e);
+  //   }
+
+  //   notifyListeners();
+  // }
 
   bool isSongPlaying(Song song) => playerState.currentSong == song;
 
