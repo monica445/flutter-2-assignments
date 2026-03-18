@@ -48,11 +48,11 @@ class _BlaLocationPickerState extends State<BlaLocationPicker> {
     });
   }
 
-  List<Location> filteredLocation(List<Location> location) {
+  List<Location> filteredLocation(List<Location> locations) {
     if (currentSearchText.length < 2) {
       return [];
     }
-    return location
+    return locations
         .where(
           (location) => location.name.toUpperCase().contains(
             currentSearchText.toUpperCase(),
