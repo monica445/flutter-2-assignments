@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import '../../../../data/repositories/songs/song_repository.dart';
+import 'package:flutter_assignments/W9-Firebase-Part1/model/song_artist.dart/song_artist.dart';
+import 'package:flutter_assignments/W9-Firebase-Part1/services/song_service.dart';
 import '../../../states/player_state.dart';
 import '../../../../model/songs/song.dart';
 import '../../../utils/async_value.dart';
 
 class LibraryViewModel extends ChangeNotifier {
-  final SongRepository songRepository;
+  final SongService songService;
   final PlayerState playerState;
 
-  AsyncValue<List<Song>> songsValue = AsyncValue.loading();
+  AsyncValue<List<SongArtist>> songsValue = AsyncValue.loading();
 
-  LibraryViewModel({required this.songRepository, required this.playerState}) {
+  LibraryViewModel({required this.songService, required this.playerState}) {
     playerState.addListener(notifyListeners);
 
     // init
@@ -34,7 +35,7 @@ class LibraryViewModel extends ChangeNotifier {
 
     try {
       // 2- Fetch is successfull
-      List<Song> songs = await songRepository.fetchSongs();
+      List<SongArtist> songs = await songService.fetchSongWithArtist();
       songsValue = AsyncValue.success(songs);
     } catch (e) {
       // 3- Fetch is unsucessfull
@@ -43,7 +44,7 @@ class LibraryViewModel extends ChangeNotifier {
      notifyListeners();
 
   }
-
+  
   bool isSongPlaying(Song song) => playerState.currentSong == song;
 
   void start(Song song) => playerState.start(song);
