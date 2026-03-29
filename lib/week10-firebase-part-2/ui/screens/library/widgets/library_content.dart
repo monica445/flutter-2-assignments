@@ -31,10 +31,12 @@ class LibraryContent extends StatelessWidget {
           itemCount: data.length,
           itemBuilder: (context, index) => LibraryItemTile(
             data: data[index],
+            isLiked: mv.isLiked(data[index].song),
             isPlaying: mv.isSongPlaying(data[index].song),
             onTap: () {
               mv.start(data[index].song);
             },
+            onLikeTap: () => mv.likeSong(data[index].song),
           ),
         );
     }

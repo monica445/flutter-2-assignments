@@ -26,6 +26,8 @@ class LibraryViewModel extends ChangeNotifier {
     _init();
   }
 
+  final Set<String> likedSongIds = {};
+
   @override
   void dispose() {
     playerState.removeListener(notifyListeners);
@@ -74,4 +76,22 @@ class LibraryViewModel extends ChangeNotifier {
 
   void start(Song song) => playerState.start(song);
   void stop(Song song) => playerState.stop();
+
+  Future<void> likeSong(Song song) async {
+    if (likedSongIds.contains(song.id)) return;
+
+    likedSongIds.add(song.id); 
+    notifyListeners();
+
+    try {
+      await songRepository.updateLikes(song.id, song.likes + 1);
+    } catch (e) {
+      print("Like failed: $e");
+
+      likedSongIds.remove(song.id);
+      notifyListeners();
+    }
+  }
+
+  bool isLiked(Song song) => likedSongIds.contains(song.id);
 }
