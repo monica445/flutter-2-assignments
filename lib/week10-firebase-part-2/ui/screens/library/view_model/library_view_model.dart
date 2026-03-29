@@ -94,4 +94,30 @@ class LibraryViewModel extends ChangeNotifier {
   }
 
   bool isLiked(Song song) => likedSongIds.contains(song.id);
+
+  //force fetching data from api instead of fetching from catch
+  Future<void> refresh() async {
+    // 🔥 SHOW LOADING
+    data = AsyncValue.loading();
+    notifyListeners();
+
+    try {
+      final songs = await songRepository.fetchSongs(forceFetch: true);
+      final artists = await artistRepository.fetchArtists(forceFetch: true);
+
+      final mapArtist = {for (var a in artists) a.id: a};
+
+      data = AsyncValue.success(
+        songs
+            .map(
+              (s) => LibraryItemData(song: s, artist: mapArtist[s.artistId]!),
+            )
+            .toList(),
+      );
+    } catch (e) {
+      data = AsyncValue.error(e);
+    }
+
+    notifyListeners();
+  }
 }

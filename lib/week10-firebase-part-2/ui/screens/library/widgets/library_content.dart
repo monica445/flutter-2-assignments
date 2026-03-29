@@ -24,21 +24,27 @@ class LibraryContent extends StatelessWidget {
         break;
       case AsyncValueState.error:
         content = Center(child: Text('error = ${asyncValue.error!}', style: TextStyle(color: Colors.red),));
+        break;
 
       case AsyncValueState.success:
         List<LibraryItemData> data = asyncValue.data!;
-        content = ListView.builder(
-          itemCount: data.length,
-          itemBuilder: (context, index) => LibraryItemTile(
-            data: data[index],
-            isLiked: mv.isLiked(data[index].song),
-            isPlaying: mv.isSongPlaying(data[index].song),
-            onTap: () {
-              mv.start(data[index].song);
-            },
-            onLikeTap: () => mv.likeSong(data[index].song),
+        content = RefreshIndicator(
+          onRefresh: () => mv.refresh(), 
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(), 
+            itemCount: data.length,
+            itemBuilder: (context, index) => LibraryItemTile(
+              data: data[index],
+              isLiked: mv.isLiked(data[index].song),
+              isPlaying: mv.isSongPlaying(data[index].song),
+              onTap: () {
+                mv.start(data[index].song);
+              },
+              onLikeTap: () => mv.likeSong(data[index].song),
+            ),
           ),
         );
+        break;
     }
 
     return Padding(
@@ -47,7 +53,18 @@ class LibraryContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(height: 16),
-          Text("Library", style: AppTextStyles.heading),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Library", style: AppTextStyles.heading),
+              IconButton(
+                onPressed: () {
+                  context.read<LibraryViewModel>().refresh();
+                },
+                icon: Icon(Icons.refresh),
+              ),
+            ],
+          ),
           SizedBox(height: 50),
 
           Expanded(child: content),
